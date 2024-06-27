@@ -2,6 +2,7 @@ package application;
 
 import models.Balle;
 import models.Barre;
+import models.Brique;
 import models.Sprite;
 
 import javax.swing.*;
@@ -16,13 +17,16 @@ public class Fenetre extends Canvas implements KeyListener {
     public static final int HAUTEUR = 700;
 
     protected boolean toucheEspace = false;
+    protected boolean toucheGauche = false;
+    protected boolean toucheDroite = false;
+
+    protected int vitesseRectangle = 10;
 
     ArrayList<Balle> listeBalles = new ArrayList<>();
     ArrayList<Sprite> listeSprites = new ArrayList<>();
     Barre barre;
 
     Fenetre()  throws InterruptedException {
-
         JFrame fenetre = new JFrame();
 
         this.setSize(LARGEUR, HAUTEUR);
@@ -37,27 +41,41 @@ public class Fenetre extends Canvas implements KeyListener {
         fenetre.requestFocus();
         fenetre.addKeyListener(this);
 
-
         Container panneau = fenetre.getContentPane();
         panneau.add(this);
 
         fenetre.setVisible(true);
         this.createBufferStrategy(2);
-
-
-
         this.demarrer();
     }
 
     public void demarrer() throws InterruptedException {
-
         barre = new Barre();
         listeSprites.add(barre);
 
-        Balle balle = new Balle(100, 200 , Color.GREEN, 30);
+        Balle balle = new Balle(100, 200 , Color.BLACK, 30);
 
         listeBalles.add(balle);
         listeSprites.add(balle);
+
+        int nombreColonnes = 6;
+        int nombreLignes = 8;
+
+        int briqueLargeur = 80;
+        int briqueHauteur = 20;
+
+        int briqueEspace = 7;
+
+
+        for (int row = 0; row < nombreLignes; row++) {
+            for (int col = 0; col < nombreColonnes; col++) {
+                int x = col * (briqueLargeur + briqueEspace);
+                int y = row * (briqueHauteur + briqueEspace);
+                Color couleur = Color.GREEN;
+                Brique brique = new Brique(x, y, briqueLargeur, briqueHauteur, couleur);
+                listeSprites.add(brique);
+            }
+        }
 
         while(true) {
 
@@ -66,8 +84,21 @@ public class Fenetre extends Canvas implements KeyListener {
             dessin.fillRect(0,0,LARGEUR,HAUTEUR);
 
             //----- app -----
-            for(Balle b : listeBalles) {
-                b.deplacement();
+            for(Balle uneBalle : listeBalles) {
+                for (int i = 0; i < listeSprites.size(); i++) {
+                    Sprite sprite = listeSprites.get(i);
+                    if (sprite instanceof Brique) {
+                        Brique brique = (Brique) sprite;
+                        if (balle.intersectionAvec(brique)) {
+                            listeSprites.remove(i);
+                            balle.inverserDirectionY();
+                            break;
+                        }
+                    }
+                }
+
+                balle.deplacement();
+                balle.collisionAvec(barre);
             }
 
             for(Sprite s : listeSprites) {
@@ -78,6 +109,13 @@ public class Fenetre extends Canvas implements KeyListener {
             if(toucheEspace) {
                 listeBalles.add( new Balle(200, 400 , Color.BLUE, 50));
             }
+
+            if(toucheDroite) {
+                barre.versLaDroite(vitesseRectangle);
+            } else if(toucheGauche) {
+                barre.versLaGauche(vitesseRectangle);
+            }
+
             //---------------
 
             dessin.dispose();
@@ -94,15 +132,20 @@ public class Fenetre extends Canvas implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_SPACE) {
-            toucheEspace = true;
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_SPACE -> toucheEspace = true;
+            case KeyEvent.VK_LEFT -> toucheGauche = true;
+            case KeyEvent.VK_RIGHT -> toucheDroite = true;
         }
     }
 
     @Override
-    public void  keyReleased(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_SPACE) {
-            toucheEspace = false;
+    public void keyReleased(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_SPACE -> toucheEspace = false;
+            case KeyEvent.VK_LEFT -> toucheGauche = false;
+            case KeyEvent.VK_RIGHT -> toucheDroite = false;
         }
     }
+
 }

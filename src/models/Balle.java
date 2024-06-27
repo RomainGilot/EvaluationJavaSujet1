@@ -3,11 +3,12 @@ package models;
 import application.Fenetre;
 
 import java.awt.*;
+import java.awt.Rectangle;
 
 public class Balle extends Sprite{
 
-    protected int vitesseX = 10;
-    protected int vitesseY = 10;
+    protected int vitesseX = 8;
+    protected int vitesseY = 8;
     protected int diametre = 50;
 
     public Balle(int x, int y, Color couleur, int diametre) {
@@ -40,6 +41,24 @@ public class Balle extends Sprite{
         x += vitesseX;
         y += vitesseY;
     }
+
+    public void collisionAvec(Barre barre) {
+        if (y + diametre >= barre.y && x >= barre.x && x <= barre.x + barre.largeur) {
+            vitesseY = -vitesseY;
+        }
+    }
+
+    public boolean intersectionAvec(Brique brique) {
+        Rectangle limitesBalle = new Rectangle(x, y, diametre, diametre);
+        Rectangle limitesBrique = new Rectangle(brique.x, brique.y, brique.largeur, brique.hauteur);
+
+        return limitesBalle.intersects(limitesBrique);
+    }
+
+    public void inverserDirectionY() {
+        vitesseY = -vitesseY;
+    }
+
 
     public void dessiner(Graphics2D dessin) {
         dessin.setColor(couleur);

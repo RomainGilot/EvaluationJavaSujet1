@@ -5,7 +5,7 @@ import java.awt.*;
 public abstract class Sprite {
     protected int x = 0;
     protected int y = 0;
-    protected Color couleur = Color.RED;
+    protected Color couleur = Color.GREEN;
 
     public Sprite(int x, int y, Color couleur) {
         this.x = x;
